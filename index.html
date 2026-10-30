@@ -270,7 +270,7 @@
     const DEFAULT_VIDEO_ID = 'jfKfPfyJRdk';
 
     const quotes = [
-      "CREA TU FUTURO",
+      "FOCUS!",
       "SIN EXCUSAS",
       "SIGUE AVANZANDO",
       "EL TIEMPO NO REGRESA",
@@ -440,14 +440,14 @@
       state.shortBreak = breakMinutes * 60;
       state.longBreak = (breakMinutes * 3) * 60;
       state.currentMode = 'work';
-      state.timeLeft = state.workTime; // <--- Línea corregida que actualiza el temporizador de inmediato
+      state.timeLeft = state.workTime;
 
       dom.btnPreset25.classList.toggle('active-preset', workMinutes === 25);
       dom.btnPreset50.classList.toggle('active-preset', workMinutes === 50);
       updateUI();
     }
 
-    // YouTube API
+    // --- YOUTUBE API FIX (Uso de origin estricto y dominio estándar) ---
     let player = null;
     function extractYouTubeID(input) {
       const trimmed = input.trim();
@@ -463,17 +463,19 @@
 
     window.onYouTubeIframeAPIReady = function() {
       player = new YT.Player('ytPlayer', {
-        host: 'https://www.youtube-nocookie.com',
         videoId: state.videoId,
         playerVars: {
           autoplay: 1,
           controls: 0,
           loop: 1,
           playlist: state.videoId,
-          origin: window.location.origin !== 'null' ? window.location.origin : 'https://localhost'
+          enablejsapi: 1,
+          origin: window.location.origin // Asigna correctamente https://jvit04.github.io
         },
         events: {
-          onReady: (e) => e.target.playVideo(),
+          onReady: (e) => {
+            e.target.playVideo();
+          },
           onStateChange: (e) => {
             if (e.data === YT.PlayerState.ENDED) player.playVideo();
           }
@@ -496,7 +498,7 @@
     }
 
     function toggleMute() {
-      if (!player || !player.isMuted) return;
+      if (!player) return;
       if (player.isMuted()) {
         player.unMute();
         dom.btnToggleMute.textContent = '🔊';
